@@ -15,3 +15,11 @@
 ## server的代码编写
 * 同样需要使用 `shutdown` 函数更好
    
+## 使用的抓包软件
+`tcpdump`
+
+    tcpdump -i lo tcp and port 8888 -s0 -w ./tcp_closex.pcap
+
+分析软件 `Wireshark` 
+
+* 将上面的 `.pacp` 使用该软件打开即可
