@@ -51,13 +51,13 @@ int HttpConn::m_user_count_ = 0;
 // 初始化连接，初始化套接字和地址
 bool HttpConn::Init(int fd, const sockaddr_in& addr) {
     // 初始化任务
-    sockfd_ = fd;
+    m_sockfd_ = fd;
     m_addr_ = addr;
 
     // 设置端口复用
     int reuse = 1;
-    setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
-    if (!Addfd(HttpConn::m_epollfd_, sockfd_, true)) {
+    setsockopt(m_sockfd_, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+    if (!Addfd(HttpConn::m_epollfd_, m_sockfd_, true)) {
         std::cout << "客户端套接字加入epoll失败" << std::endl;
         return false;
     }
@@ -73,15 +73,15 @@ void HttpConn::Init() {
 
 // 关闭连接
 bool HttpConn::CloseConn() {
-    if (sockfd_ != -1) {
+    if (m_sockfd_ != -1) {
         // 从 epoll 移除 fd
-        if (!Removefd(HttpConn::m_epollfd_, sockfd_)) {
+        if (!Removefd(HttpConn::m_epollfd_, m_sockfd_)) {
             char ip[16];
             inet_ntop(AF_INET, &m_addr_.sin_addr.s_addr, ip, sizeof(ip));
-            printf("客户端套接字 %d, IP : %s 初始化失败\n", sockfd_, ip);
+            printf("客户端套接字 %d, IP : %s 初始化失败\n", m_sockfd_, ip);
             return false;
         }
-        sockfd_ = -1;
+        m_sockfd_ = -1;
         HttpConn::m_user_count_--;
     }
     return true;
