@@ -80,7 +80,7 @@
 + 使用 ioev 分块写方式
 + 采用正则表达式解析 http 请求头（C++的正则表达式好像在不同平台表现不同）
 
-编译指令（防止忘记
+编译指令（防止忘记）
 `g++ -o server ./src/*.cpp -I ./include -pthread`
 
 采用 webbranch 压力测试
