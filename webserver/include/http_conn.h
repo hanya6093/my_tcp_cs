@@ -3,6 +3,7 @@
 
 #include "locker.h"
 #include "threadpool.h"
+#include "lst_timer.h"
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
@@ -21,19 +22,24 @@
 #include <sys/mman.h>
 #include <sys/uio.h>
 #include <stdarg.h>
+#include <assert.h>
+
+
 
 class HttpConn {
 public:
     HttpConn();
     ~HttpConn();
-    bool Init(int fd, const sockaddr_in& addr); // 初始化任务的fd和地址等
+    bool Init(int fd, const sockaddr_in& addr, Util_Timer* timer, Sort_Timer_List* timer_list); // 初始化任务的fd和地址等
     void Process();     // 任务处理
     bool CloseConn();   // 关闭连接
     bool Read();        // 读取数据
     bool Write();       // 写入数据
+    int Get_m_sockfd();  // 获取socket文件描述符
 public:
-    static int m_epollfd_;       // 所有注册到epoll中得任务
-    static int m_user_count_;    // 用户数量
+    static int m_epollfd_;              // 所有注册到epoll中得任务
+    static int m_user_count_;           // 用户数量
+    static Sort_Timer_List* m_list_head_;    // timer 管理队列
 
     static const int READ_BUFFER_SIZE_ = 2048;      // 读缓冲区大小
     static const int WRITE_BUFFER_SIZE_ = 2048;     // 写缓冲区大小
@@ -121,6 +127,7 @@ private:
     
     int m_sockfd_;                          // 任务对应的套接字
     sockaddr_in m_addr_;                    // 客户端地址
+    Util_Timer* m_timer_;                      // 定时器
 
     char m_read_buf_[READ_BUFFER_SIZE_];    // 读缓冲区大小
     int m_read_idx_;                        // 标识内核缓冲区数据被读缓冲区已经读入的数据的最后一个字节的下一个位置

@@ -87,3 +87,5 @@
 `./webbranch -c 1000 -t 10 http://IP:port/index.html`
 +    -c 表示访问个数 -t 表示访问时间
 + 压力测试软件，文件目录下 make 即可
+
+## 加入定时器

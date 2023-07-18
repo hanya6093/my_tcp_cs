@@ -1,5 +1,5 @@
 #include "http_conn.h"
-
+ 
 
 
 // ********************全局API************************
@@ -85,9 +85,12 @@ bool Modfd(int epollfd, int fd, int ev) {
 // 初始化静态变量
 int HttpConn::m_epollfd_ = -1;
 int HttpConn::m_user_count_ = 0;
+Sort_Timer_List* HttpConn::m_list_head_ = nullptr;
 
 HttpConn::HttpConn() {
     m_sockfd_ = -1;
+    memset(&m_addr_, 0, sizeof(m_addr_));
+    m_timer_ = nullptr;
 }
 
 HttpConn::~HttpConn() {
@@ -95,10 +98,12 @@ HttpConn::~HttpConn() {
 }
 
 // 二次初始化连接，初始化套接字和地址
-bool HttpConn::Init(int fd, const sockaddr_in& addr) {
+bool HttpConn::Init(int fd, const sockaddr_in& addr, Util_Timer* timer, Sort_Timer_List* timer_list) {
     // 初始化任务
     m_sockfd_ = fd;
     m_addr_ = addr;
+    m_timer_ = timer;
+    m_list_head_ = timer_list;
 
     // 设置端口复用
     int reuse = 1;
@@ -149,8 +154,13 @@ bool HttpConn::CloseConn() {
             printf("客户端套接字 %d, IP : %s 关闭失败\n", m_sockfd_, ip);
             return false;
         }
+        close(m_sockfd_);
         m_sockfd_ = -1;
         HttpConn::m_user_count_--;
+        if (m_timer_) {
+            m_list_head_->Del_Timer(m_timer_);
+            m_timer_ = nullptr;
+        }
     }
     // std::cout << m_sockfd_ << std::endl;
     return true;
@@ -256,6 +266,10 @@ bool HttpConn::Write() {
     return true;
 }
 
+int HttpConn::Get_m_sockfd() {
+    return m_sockfd_;
+}
+
 void HttpConn::Process() {
     // std::cout << "Process : 开始处理" << std::endl;
     // 解析http请求
@@ -307,7 +321,7 @@ HttpConn::HTTP_CODE HttpConn::Process_Read() {
         // 获取一行数据
         text = Get_Line();
         m_start_of_line_ = m_checked_idx_;
-        // printf("got 1 http line : %s\n", text);
+        printf("got 1 http line : %s\n", text);
         // std::cout << m_check_status_ << std::endl;
 
         // 状态不同处理方式
