@@ -270,6 +270,10 @@ int HttpConn::Get_m_sockfd() {
     return m_sockfd_;
 }
 
+Util_Timer* HttpConn::Get_m_timer() {
+    return m_timer_;
+}
+
 void HttpConn::Process() {
     // std::cout << "Process : 开始处理" << std::endl;
     // 解析http请求

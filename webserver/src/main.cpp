@@ -242,6 +242,13 @@ int main(int argc, char* argv[]) {
             } else if (events[i].events & EPOLLIN) {
                 // —— EPOLLIN 读事件，读取信息，将任务加队列中等待子线程处理
                 if (users[curfd].Read()) {
+                    Util_Timer* timer = users[curfd].Get_m_timer();
+                    if (timer) {
+                        time_t cur = time(nullptr);
+                        timer->expire_ = cur + 3 * TIMESLOT;
+                        std::cout << "adjust timer once" << std::endl;
+                        users[curfd].m_list_head_->Adjust_Timer(timer);
+                    }
                     pool->Append(users + curfd);
                 } else {
                     users[curfd].CloseConn();

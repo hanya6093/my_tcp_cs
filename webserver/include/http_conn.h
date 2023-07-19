@@ -31,11 +31,13 @@ public:
     HttpConn();
     ~HttpConn();
     bool Init(int fd, const sockaddr_in& addr, Util_Timer* timer, Sort_Timer_List* timer_list); // 初始化任务的fd和地址等
-    void Process();     // 任务处理
-    bool CloseConn();   // 关闭连接
-    bool Read();        // 读取数据
-    bool Write();       // 写入数据
-    int Get_m_sockfd();  // 获取socket文件描述符
+    void Process();             // 任务处理
+    bool CloseConn();           // 关闭连接
+    bool Read();                // 读取数据
+    bool Write();               // 写入数据
+    int Get_m_sockfd();         // 获取socket文件描述符
+    Util_Timer* Get_m_timer();  // 获取timer
+
 public:
     static int m_epollfd_;              // 所有注册到epoll中得任务
     static int m_user_count_;           // 用户数量
